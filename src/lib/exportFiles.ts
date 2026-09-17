@@ -129,3 +129,4 @@ export function patternChartHtml(
   <ul>${legend}</ul>
 </body>
 </html>`
+}
