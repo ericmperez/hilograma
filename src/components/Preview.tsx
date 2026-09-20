@@ -11,6 +11,7 @@ interface PreviewProps {
   fabric: FabricKind
   showOriginal: boolean
   busy: boolean
+  error?: string | null
 }
 
 export function Preview({
@@ -21,6 +22,7 @@ export function Preview({
   fabric,
   showOriginal,
   busy,
+  error,
 }: PreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [playing, setPlaying] = useState(false)
@@ -104,6 +106,7 @@ export function Preview({
           </div>
         )}
         {busy && <div className="stage-busy">Hilvanando…</div>}
+        {error && <div className="stage-busy">{error}</div>}
         {pattern && pattern.palette.length > 0 && !showOriginal && (
           <div className="sew-bar">
             <button

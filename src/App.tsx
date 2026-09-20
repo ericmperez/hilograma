@@ -15,6 +15,7 @@ export default function App() {
   const [pattern, setPattern] = useState<EmbroideryPattern | null>(null)
   const [busy, setBusy] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   function loadFile(file: File) {
     const url = URL.createObjectURL(file)
@@ -27,24 +28,39 @@ export default function App() {
   }
 
   async function loadSample() {
-    const canvas = createSampleImage()
-    const next = await canvasToImage(canvas)
-    setImage(next)
-    setShowOriginal(false)
+    try {
+      const canvas = createSampleImage()
+      const next = await canvasToImage(canvas)
+      setError(null)
+      setImage(next)
+      setShowOriginal(false)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo crear el motivo de ejemplo')
+    }
   }
 
   useEffect(() => {
-    void loadSample()
+    const handle = window.setTimeout(() => {
+      void loadSample()
+    }, 80)
+    return () => window.clearTimeout(handle)
   }, [])
 
   useEffect(() => {
     if (!image) return
     setBusy(true)
+    setError(null)
     const handle = window.setTimeout(() => {
-      const next = imageToPattern(image, image.naturalWidth, image.naturalHeight, settings)
-      setPattern(next)
-      setBusy(false)
-    }, 60)
+      try {
+        const next = imageToPattern(image, image.naturalWidth, image.naturalHeight, settings)
+        setPattern(next)
+      } catch (cause) {
+        setPattern(null)
+        setError(cause instanceof Error ? cause.message : 'No se pudo digitalizar el bordado')
+      } finally {
+        setBusy(false)
+      }
+    }, 40)
     return () => window.clearTimeout(handle)
   }, [image, settings])
 
@@ -90,6 +106,7 @@ export default function App() {
           fabric={settings.fabric}
           showOriginal={showOriginal}
           busy={busy}
+          error={error}
         />
         <aside className="rail">
           <Palette pattern={pattern} settings={settings} paths={paths} />
