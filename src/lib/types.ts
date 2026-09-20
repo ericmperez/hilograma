@@ -1,4 +1,6 @@
-export type StitchStyle = 'cruz' | 'saten' | 'relleno' | 'contorno'
+export type StitchStyle = 'real' | 'cruz' | 'saten' | 'relleno' | 'contorno'
+export type FabricKind = 'aida' | 'lino'
+export type PathKind = 'cross' | 'satin' | 'fill' | 'outline' | 'underlay'
 
 export interface DmcColor {
   code: string
@@ -18,6 +20,11 @@ export interface Settings {
   brightness: number
   contrast: number
   aidaCount: number
+  density: number
+  fillAngle: number
+  maxStitchMm: number
+  underlay: boolean
+  fabric: FabricKind
 }
 
 export interface EmbroideryPattern {
@@ -36,15 +43,21 @@ export interface Point {
 export interface ThreadPath {
   colorIndex: number
   points: Point[]
+  kind?: PathKind
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  gridWidth: 72,
-  colorCount: 10,
-  style: 'cruz',
+  gridWidth: 80,
+  colorCount: 12,
+  style: 'real',
   ignoreLightBackground: true,
   backgroundThreshold: 0.86,
   brightness: 0,
   contrast: 8,
   aidaCount: 14,
+  density: 1,
+  fillAngle: 32,
+  maxStitchMm: 5.5,
+  underlay: true,
+  fabric: 'aida',
 }

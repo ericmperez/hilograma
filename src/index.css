@@ -237,6 +237,10 @@ p {
   margin-bottom: 16px;
 }
 
+.style-grid-5 {
+  grid-template-columns: 1fr 1fr;
+}
+
 .style-btn {
   text-align: left;
   border: 1px solid var(--line);
@@ -273,6 +277,10 @@ p {
   mask-repeat: no-repeat;
   mask-position: left center;
   mask-size: contain;
+}
+
+.style-real {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 18'%3E%3Cpath d='M3 14 L12 4 L25 14 M3 8 H25' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .style-cruz {
@@ -328,6 +336,74 @@ p {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.warn-list {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f3d8c4;
+  color: #6a2a18;
+  font-size: 12px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.fabric-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.fabric-toggle div {
+  display: flex;
+  gap: 6px;
+}
+
+.fabric-toggle button {
+  border: 1px solid var(--line);
+  background: #fbf6ec;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.fabric-toggle button.active {
+  background: #f4e4d4;
+  border-color: var(--oxblood);
+}
+
+.sew-bar {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(36, 25, 16, 0.72);
+}
+
+.sew-bar button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--brass);
+  color: #2a1d14;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sew-bar input {
+  flex: 1;
+  accent-color: #f3ead8;
 }
 
 .stats div {

@@ -130,8 +130,11 @@ export function buildDstFile(
   paths?: ThreadPath[],
   label = 'HILOGRAMA',
 ) {
-  const threadPaths = paths ?? buildThreadPaths(pattern, settings.style)
+  const threadPaths = (paths ?? buildThreadPaths(pattern, settings)).filter(
+    (path) => path.kind !== 'underlay' || settings.underlay,
+  )
   const unit = Math.max(8, Math.round(254 / settings.aidaCount))
+  const travelLimit = Math.round(2.2 * 10)
   const records: Uint8Array[] = []
   let cx = 0
   let cy = 0
@@ -140,6 +143,7 @@ export function buildDstFile(
   let minY = 0
   let maxY = 0
   let colorChanges = 0
+  let stitchRecords = 0
 
   const toMachine = (x: number, y: number) => ({
     x: Math.round((x - pattern.width / 2) * unit),
@@ -148,6 +152,7 @@ export function buildDstFile(
 
   const goTo = (x: number, y: number, flag: Flag) => {
     splitDelta(x - cx, y - cy, flag, records)
+    if (flag === 'stitch') stitchRecords += 1
     cx = x
     cy = y
     minX = Math.min(minX, cx)
@@ -156,27 +161,43 @@ export function buildDstFile(
     maxY = Math.max(maxY, cy)
   }
 
+  const tie = (x: number, y: number) => {
+    goTo(x + 3, y, 'stitch')
+    goTo(x, y + 3, 'stitch')
+    goTo(x, y, 'stitch')
+  }
+
   let lastColor = -1
   for (const path of threadPaths) {
     if (path.points.length === 0) continue
     if (lastColor !== -1 && path.colorIndex !== lastColor) {
+      tie(cx, cy)
       records.push(encodeRecord(0, 0, 'color'))
       colorChanges += 1
     }
+    const changedColor = lastColor !== path.colorIndex
     lastColor = path.colorIndex
     const start = toMachine(path.points[0].x, path.points[0].y)
-    goTo(start.x, start.y, 'jump')
+    const gap = Math.hypot(start.x - cx, start.y - cy)
+    if (!changedColor && gap > 0 && gap <= travelLimit) {
+      goTo(start.x, start.y, 'stitch')
+    } else {
+      goTo(start.x, start.y, 'jump')
+      tie(start.x, start.y)
+    }
     for (let i = 1; i < path.points.length; i++) {
       const next = toMachine(path.points[i].x, path.points[i].y)
       goTo(next.x, next.y, 'stitch')
     }
   }
+  if (threadPaths.length) tie(cx, cy)
+  goTo(0, 0, 'jump')
   records.push(encodeRecord(0, 0, 'end'))
 
   const name = pad(label.replace(/[^\w-]+/g, '').slice(0, 16) || 'HILOGRAMA', 16)
   const headerLines = [
     `LA:${name}\r`,
-    `ST:${String(records.length).padStart(7, ' ')}\r`,
+    `ST:${String(stitchRecords).padStart(7, ' ')}\r`,
     `CO:${String(colorChanges).padStart(3, ' ')}\r`,
     `+X:${String(Math.abs(maxX)).padStart(5, ' ')}\r`,
     `-X:${String(Math.abs(minX)).padStart(5, ' ')}\r`,

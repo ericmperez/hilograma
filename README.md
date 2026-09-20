@@ -6,11 +6,12 @@ Convierte una foto en un patrón de bordado. Todo corre en el navegador: no hace
 
 - Reduce la imagen a una grilla de puntadas
 - Cuantiza el color y lo acerca a hilos **DMC**
-- Simula cuatro estilos: **punto de cruz**, **satén**, **relleno tatami** y **contorno**
+- Digitaliza un modelo real: **satén** en zonas estrechas, **tatami** en rellenos y **contorno** al final
+- Simula también **punto de cruz**, satén, relleno y contorno por separado
 - Calcula el tamaño real según la cuenta de Aida
 - Exporta **PNG**, **SVG**, **carta de patrón**, **lista de hilos** y **DST** para máquina Tajima
 
-El DST es un archivo de bordado de máquina. Ábrelo en tu software (Wilcom, Ink/Stitch, Hatch, PE-Design, etc.) y revisa densidad y saltos antes de coserlo. Hilograma genera un diseño utilizable, no un archivo de producción final listo para fábrica.
+La vista previa enseña tela Aida o lino, hilo con volumen y el aro. Puedes reproducir cómo se va bordando. El DST incluye underlay, atados, saltos cortos como viaje y puntadas partidas a un largo máximo. Ábrelo en Wilcom, Ink/Stitch, Hatch o PE-Design y revisa densidad antes de coserlo en tela buena.
 
 ## Uso
 

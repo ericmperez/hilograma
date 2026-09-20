@@ -1,18 +1,51 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { renderEmbroidery, renderSource } from '../lib/render'
-import type { EmbroideryPattern, StitchStyle, ThreadPath } from '../lib/types'
+import { stitchCount } from '../lib/stitches'
+import type { EmbroideryPattern, FabricKind, StitchStyle, ThreadPath } from '../lib/types'
 
 interface PreviewProps {
   image: HTMLImageElement | null
   pattern: EmbroideryPattern | null
   paths: ThreadPath[]
   style: StitchStyle
+  fabric: FabricKind
   showOriginal: boolean
   busy: boolean
 }
 
-export function Preview({ image, pattern, paths, style, showOriginal, busy }: PreviewProps) {
+export function Preview({
+  image,
+  pattern,
+  paths,
+  style,
+  fabric,
+  showOriginal,
+  busy,
+}: PreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(1)
+
+  useEffect(() => {
+    setPlaying(false)
+    setProgress(1)
+  }, [pattern, style, paths])
+
+  useEffect(() => {
+    if (!playing) return
+    const total = Math.max(1, stitchCount(paths))
+    const started = performance.now()
+    const duration = Math.min(28000, Math.max(4200, total * 4.2))
+    let frame = 0
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - started) / duration)
+      setProgress(t)
+      if (t < 1) frame = requestAnimationFrame(tick)
+      else setPlaying(false)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [playing, paths])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -36,7 +69,11 @@ export function Preview({ image, pattern, paths, style, showOriginal, busy }: Pr
       }
 
       if (pattern) {
-        renderEmbroidery(ctx, pattern, paths, style, canvas.width, canvas.height)
+        renderEmbroidery(ctx, pattern, paths, style, canvas.width, canvas.height, {
+          fabric,
+          progress,
+          showHoop: true,
+        })
         return
       }
 
@@ -54,7 +91,7 @@ export function Preview({ image, pattern, paths, style, showOriginal, busy }: Pr
     const observer = new ResizeObserver(paint)
     if (canvas.parentElement) observer.observe(canvas.parentElement)
     return () => observer.disconnect()
-  }, [image, pattern, paths, style, showOriginal])
+  }, [image, pattern, paths, style, fabric, showOriginal, progress])
 
   return (
     <section className="stage">
@@ -67,6 +104,30 @@ export function Preview({ image, pattern, paths, style, showOriginal, busy }: Pr
           </div>
         )}
         {busy && <div className="stage-busy">Hilvanando…</div>}
+        {pattern && pattern.palette.length > 0 && !showOriginal && (
+          <div className="sew-bar">
+            <button
+              type="button"
+              onClick={() => {
+                setProgress(0)
+                setPlaying(true)
+              }}
+            >
+              {playing ? 'Bordando…' : 'Ver cómo se borde'}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={progress}
+              onChange={(event) => {
+                setPlaying(false)
+                setProgress(Number(event.target.value))
+              }}
+            />
+          </div>
+        )}
       </div>
     </section>
   )

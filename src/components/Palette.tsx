@@ -1,3 +1,4 @@
+import { machineWarnings, stitchLengthMm } from '../lib/digitize'
 import { physicalSizeCm, totalStitches } from '../lib/process'
 import { stitchCount } from '../lib/stitches'
 import type { EmbroideryPattern, Settings, ThreadPath } from '../lib/types'
@@ -26,6 +27,9 @@ export function Palette({ pattern, settings, paths }: PaletteProps) {
 
   const size = physicalSizeCm(pattern, settings.aidaCount)
   const cells = totalStitches(pattern)
+  const lengthM = stitchLengthMm(paths, settings.aidaCount) / 1000
+  const minutes = Math.max(1, Math.round(stitchCount(paths) / 620))
+  const notes = machineWarnings(paths, settings)
 
   return (
     <section className="panel">
@@ -51,9 +55,25 @@ export function Palette({ pattern, settings, paths }: PaletteProps) {
           <b>
             {size.width}×{size.height}
           </b>
-          <span>cm</span>
+          <span>cm en el aro</span>
+        </div>
+        <div>
+          <b>{lengthM.toFixed(1)} m</b>
+          <span>hilo aprox.</span>
+        </div>
+        <div>
+          <b>{minutes} min</b>
+          <span>a 620 ppm</span>
         </div>
       </div>
+
+      {notes.length > 0 && (
+        <ul className="warn-list">
+          {notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      )}
 
       <ul className="thread-list">
         {pattern.palette.map((color, index) => (

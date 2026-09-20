@@ -49,8 +49,8 @@ export default function App() {
   }, [image, settings])
 
   const paths = useMemo(
-    () => (pattern ? buildThreadPaths(pattern, settings.style) : []),
-    [pattern, settings.style],
+    () => (pattern ? buildThreadPaths(pattern, settings) : []),
+    [pattern, settings],
   )
 
   return (
@@ -87,6 +87,7 @@ export default function App() {
           pattern={pattern}
           paths={paths}
           style={settings.style}
+          fabric={settings.fabric}
           showOriginal={showOriginal}
           busy={busy}
         />

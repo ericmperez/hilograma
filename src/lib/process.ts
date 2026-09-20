@@ -188,7 +188,62 @@ export function imageToPattern(
     counts[best] += 1
   }
 
+  smoothCells(cells, width, height, counts)
   return { width, height, cells, palette, counts }
+}
+
+function neighborCounts(cells: (number | null)[][], x: number, y: number) {
+  const tallies = new Map<number, number>()
+  let filled = 0
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue
+      const nx = x + dx
+      const ny = y + dy
+      if (ny < 0 || nx < 0 || ny >= cells.length || nx >= cells[0].length) continue
+      const value = cells[ny][nx]
+      if (value == null) continue
+      filled += 1
+      tallies.set(value, (tallies.get(value) ?? 0) + 1)
+    }
+  }
+  let best: number | null = null
+  let bestN = 0
+  for (const [color, n] of tallies) {
+    if (n > bestN) {
+      best = color
+      bestN = n
+    }
+  }
+  return { filled, best, bestN, same: (color: number | null) => (color == null ? 0 : tallies.get(color) ?? 0) }
+}
+
+function smoothCells(
+  cells: (number | null)[][],
+  width: number,
+  height: number,
+  counts: number[],
+) {
+  const next = cells.map((row) => row.slice())
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const current = cells[y][x]
+      const { filled, best, bestN, same } = neighborCounts(cells, x, y)
+      if (current != null && same(current) <= 1 && filled >= 3 && best != null && bestN >= 3) {
+        next[y][x] = best
+        counts[current] -= 1
+        counts[best] += 1
+        continue
+      }
+      if (current == null && best != null && bestN >= 6) {
+        next[y][x] = best
+        counts[best] += 1
+      }
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) cells[y][x] = next[y][x]
+  }
 }
 
 export function physicalSizeCm(pattern: EmbroideryPattern, aidaCount: number) {

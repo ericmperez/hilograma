@@ -28,7 +28,7 @@ export function ExportBar({
 
   function exportPng() {
     if (!pattern) return
-    const canvas = exportPreviewPng(pattern, paths, settings.style)
+    const canvas = exportPreviewPng(pattern, paths, settings.style, 16, settings.fabric)
     downloadDataUrl(canvas.toDataURL('image/png'), 'hilograma-bordado.png')
   }
 
